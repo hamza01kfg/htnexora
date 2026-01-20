@@ -1,0 +1,2241 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HT Service - Innovative Products</title>
+    
+    <!-- Firebase and EmailJS SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <!-- Enhanced Favicon Section -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6a11cb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="icon" href="icons/icon-192.png">
+    
+    <!-- Fallback: SVG favicon using rocket emoji -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    
+    <!-- Jameel Noori Font -->
+    <link href="https://fonts.cdnfonts.com/css/jameel-noori-nastaleeq" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --primary-color: #6a11cb;
+            --secondary-color: #2575fc;
+            --accent-color: #ffdd40;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --card-bg: white;
+            --header-bg: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --footer-bg: #333;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --brightness: 100%;
+            --contrast: 100%;
+            --saturation: 100%;
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+            --font-size: 16px;
+            --border-radius: 12px;
+            --animation-speed: 0.3s;
+            --safe-area-inset-top: env(safe-area-inset-top);
+            --safe-area-inset-bottom: env(safe-area-inset-bottom);
+            --safe-area-inset-left: env(safe-area-inset-left);
+            --safe-area-inset-right: env(safe-area-inset-right);
+        }
+
+        /* Theme Variations */
+        .theme-light {
+            --primary-color: #6a11cb;
+            --secondary-color: #2575fc;
+            --accent-color: #ffdd40;
+            --text-color: #333;
+            --bg-color: #f8f9fa;
+            --card-bg: white;
+            --header-bg: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --footer-bg: #333;
+        }
+
+        .theme-dark {
+            --primary-color: #bb86fc;
+            --secondary-color: #3700b3;
+            --accent-color: #03dac6;
+            --text-color: #e0e0e0;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --header-bg: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            --footer-bg: #1a1a1a;
+        }
+
+        .theme-nature {
+            --primary-color: #2e7d32;
+            --secondary-color: #4caf50;
+            --accent-color: #ff9800;
+            --text-color: #1b5e20;
+            --bg-color: #e8f5e9;
+            --card-bg: #ffffff;
+            --header-bg: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+            --footer-bg: #1b5e20;
+        }
+
+        .theme-ocean {
+            --primary-color: #0066cc;
+            --secondary-color: #00bcd4;
+            --accent-color: #ff5722;
+            --text-color: #01579b;
+            --bg-color: #e1f5fe;
+            --card-bg: #ffffff;
+            --header-bg: linear-gradient(135deg, #0066cc 0%, #00bcd4 100%);
+            --footer-bg: #0066cc;
+        }
+
+        /* Auth Styles */
+        .auth-container {
+            max-width: 400px;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .auth-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-message {
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .auth-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .auth-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .auth-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .user-greeting {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .logout-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .countdown-timer {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            min-width: 70px;
+        }
+
+        .countdown-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .countdown-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .offer-expired {
+            background: #ff6b6b;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: var(--border-radius);
+            margin: 2rem 0;
+        }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        html {
+            font-size: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: 0;
+            margin: 0;
+            filter: brightness(var(--brightness)) contrast(var(--contrast)) saturate(var(--saturation));
+            font-size: var(--font-size);
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Enhanced Touch Targets */
+        button, 
+        .btn,
+        .nav-link,
+        .product-card,
+        .video-item,
+        .settings-tab,
+        .theme-option,
+        .language-option,
+        .font-option {
+            touch-action: manipulation;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Mobile-Optimized Header */
+        header {
+            background: var(--header-bg);
+            color: white;
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding-top: calc(0.75rem + env(safe-area-inset-top));
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 44px;
+        }
+
+        .auth-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Navigation Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            padding: 0.75rem;
+            min-width: 44px;
+            min-height: 44px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-links li {
+            position: relative;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all var(--animation-speed) ease;
+            padding: 0.75rem 1rem;
+            display: block;
+            border-radius: 8px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-links a:hover,
+        .nav-links a:active {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .nav-links a.active {
+            background-color: rgba(255,255,255,0.15);
+            font-weight: 600;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settings-icon, 
+        .share-icon {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.75rem;
+            border-radius: 50%;
+            transition: background-color var(--animation-speed);
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-icon:hover, 
+        .share-icon:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1200px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+            min-height: calc(100vh - 160px);
+            padding-left: calc(1rem + env(safe-area-inset-left));
+            padding-right: calc(1rem + env(safe-area-inset-right));
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 2rem 1rem;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .hero h1 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+            color: var(--text-color);
+        }
+
+        /* Button Styles */
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--animation-speed) ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 50px;
+            min-width: 140px;
+            flex: 1;
+            max-width: 300px;
+            touch-action: manipulation;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(106, 17, 203, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--accent-color);
+            color: #333;
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 221, 64, 0.3);
+        }
+
+        .btn-whatsapp {
+            background-color: #25D366;
+            color: white;
+        }
+
+        .btn-whatsapp:active {
+            background-color: #128C7E;
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform var(--animation-speed) ease, box-shadow var(--animation-speed) ease;
+            color: var(--text-color);
+            position: relative;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .product-card:active {
+            transform: scale(0.98);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: var(--accent-color);
+            color: #333;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .product-img {
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-img img {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 1.25rem;
+        }
+
+        .product-info h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .product-info p {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .product-actions .btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        /* Product Detail Page */
+        .product-detail-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .product-detail-image {
+            width: 100%;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .product-detail-image img {
+            width: 50%;
+            height: 50%;
+            display: block;
+        }
+
+        .product-detail-info {
+            width: 100%;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .product-detail-info h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .product-detail-price {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .product-detail-description {
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .product-features {
+            margin: 1.5rem 0;
+        }
+
+        .product-features h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+
+        .product-features ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .product-features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .product-features li:before {
+            content: "✓";
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Mobile-Optimized Video Player */
+        .video-player-container {
+            width: 100%;
+            margin: 1.5rem auto;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .video-player {
+            width: 100%;
+            position: relative;
+            background-color: #000;
+            aspect-ratio: 16/9;
+        }
+
+        .video-player video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+
+        .video-controls {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: rgba(0,0,0,0.85);
+            color: white;
+            width: 100%;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .play-pause-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 6px;
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+            touch-action: none;
+            min-width: 50px;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--accent-color);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            font-size: 0.85rem;
+            min-width: 90px;
+            text-align: center;
+            white-space: nowrap;
+            padding: 0 0.5rem;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            min-width: 100px;
+        }
+
+        .volume-slider {
+            width: 100%;
+            margin-left: 0.5rem;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .fullscreen-btn, 
+        .speed-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+
+        .speed-options {
+            position: absolute;
+            bottom: 60px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            border-radius: 8px;
+            padding: 0.5rem;
+            display: none;
+            z-index: 10;
+            min-width: 100px;
+        }
+
+        .speed-option {
+            display: block;
+            width: 100%;
+            background: none;
+            border: none;
+            color: white;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .speed-option:active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .video-info {
+            padding: 1.25rem;
+        }
+
+        .video-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .video-item {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform var(--animation-speed) ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .video-item:active {
+            transform: scale(0.98);
+        }
+
+        .video-thumbnail {
+            height: 140px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+        }
+
+        .video-thumbnail i {
+            font-size: 2rem;
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .video-item-info {
+            padding: 1rem;
+        }
+
+        .video-item-info h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .video-item-info p {
+            color: var(--text-color);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        /* Filter Styles */
+        .filter-container {
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            -webkit-appearance: none;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.875rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            min-height: 50px;
+        }
+
+        .filter-btn:active {
+            transform: scale(0.98);
+        }
+
+        .no-products {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            grid-column: 1 / -1;
+        }
+
+        /* Form Styles */
+        .form-container {
+            width: 100%;
+            margin: 1.5rem auto;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            -webkit-appearance: none;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-message {
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .form-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .form-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--footer-bg);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            margin-top: 2rem;
+            padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Offer Banner */
+        .offer-banner {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            padding: 2rem 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #333;
+        }
+
+        .offer-banner h2 {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .offer-banner p {
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 1.5rem;
+        }
+
+        .offer-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature {
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .feature i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* Mobile-Optimized Settings Modal */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .settings-content {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            max-height: 100vh;
+            overflow-y: auto;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            z-index: 1;
+        }
+
+        .settings-header h2 {
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            cursor: pointer;
+            color: var(--text-color);
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-tabs {
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding: 0 1rem;
+            background: var(--card-bg);
+            position: sticky;
+            top: 73px;
+            z-index: 1;
+        }
+
+        .settings-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .settings-tab {
+            padding: 1rem 1.25rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            font-weight: 500;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            min-height: 44px;
+            font-size: 0.95rem;
+        }
+
+        .settings-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.25rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .setting-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-group h3 {
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .theme-options, 
+        .language-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .theme-option, 
+        .language-option {
+            padding: 0.75rem;
+            text-align: center;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all var(--animation-speed);
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .theme-option.active, 
+        .language-option.active {
+            border-color: var(--primary-color);
+            background-color: rgba(106, 17, 203, 0.1);
+        }
+
+        .theme-option .theme-preview {
+            width: 100%;
+            height: 30px;
+            border-radius: 6px;
+        }
+
+        .language-option {
+            min-height: 60px;
+        }
+
+        .display-slider {
+            width: 100%;
+            margin: 0.75rem 0;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+        }
+
+        .display-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider-value {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .slider-container label {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .font-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .font-option {
+            padding: 1rem;
+            text-align: center;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .font-option.active {
+            border-color: var(--primary-color);
+            background-color: rgba(106, 17, 203, 0.1);
+        }
+
+        .font-serif {
+            font-family: Georgia, serif;
+        }
+
+        .font-monospace {
+            font-family: 'Courier New', monospace;
+        }
+
+        .font-cursive {
+            font-family: 'Comic Sans MS', cursive;
+        }
+
+        .font-jameel {
+            font-family: 'Jameel Noori Nastaleeq', 'Jameel Noori', 'Noto Nastaliq Urdu', serif;
+        }
+
+        .reset-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 1rem;
+            width: 100%;
+            font-size: 1rem;
+            min-height: 50px;
+        }
+
+        .reset-btn:active {
+            background-color: #ff5252;
+            transform: scale(0.98);
+        }
+
+        /* Mobile Notification */
+        .notification {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            left: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 3000;
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Bottom Navigation for Mobile */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding: 0.5rem 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .mobile-nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color);
+            padding: 0.5rem;
+            min-width: 60px;
+            min-height: 44px;
+            border-radius: 8px;
+            transition: background-color var(--animation-speed);
+        }
+
+        .mobile-nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .mobile-nav-item i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .mobile-nav-item span {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: rgba(255,255,255,0.9);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary-color);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Pull to Refresh */
+        .pull-to-refresh {
+            position: absolute;
+            top: -60px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            /* Mobile Navigation */
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--header-bg);
+                flex-direction: column;
+                padding: 5rem 1rem 1rem;
+                gap: 0;
+                transition: transform 0.3s ease;
+                transform: translateX(-100%);
+                z-index: 999;
+                max-height: 100vh;
+                overflow-y: auto;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                align-items: stretch;
+                justify-content: flex-start;
+                padding-top: calc(5rem + env(safe-area-inset-top));
+            }
+
+            .nav-links.active {
+                transform: translateX(0);
+            }
+
+            .nav-links li {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .nav-links a {
+                padding: 1rem;
+                border-radius: 8px;
+                justify-content: flex-start;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                margin-bottom: 0.5rem;
+            }
+
+            /* Mobile Bottom Navigation */
+            .mobile-bottom-nav {
+                display: block;
+            }
+
+            main {
+                padding-bottom: calc(1rem + 70px + env(safe-area-inset-bottom));
+            }
+
+            /* Hero Adjustments */
+            .hero {
+                padding: 1.5rem 1rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            /* Products Grid */
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            /* Product Actions */
+            .product-actions {
+                flex-direction: column;
+            }
+
+            .product-actions .btn {
+                width: 100%;
+                min-width: 0;
+            }
+
+            /* Video Controls */
+            .video-controls {
+                padding: 0.5rem;
+                gap: 0.25rem;
+            }
+
+            .time-display {
+                min-width: 70px;
+                font-size: 0.8rem;
+            }
+
+            .volume-control {
+                min-width: 80px;
+            }
+
+            /* Settings Modal */
+            .settings-content {
+                border-radius: 0;
+                max-height: 100vh;
+            }
+
+            .settings-tabs {
+                top: 0;
+                padding: 0;
+            }
+
+            .settings-tab {
+                padding: 1rem;
+                flex: 1;
+                text-align: center;
+            }
+
+            .theme-options, 
+            .language-options,
+            .font-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            /* Filter Container */
+            .filter-container {
+                padding: 1rem;
+            }
+
+            .filter-group {
+                gap: 0.5rem;
+            }
+
+            /* Form Container */
+            .form-container {
+                padding: 1.25rem;
+            }
+
+            /* Offer Features */
+            .offer-features {
+                grid-template-columns: 1fr;
+            }
+
+            /* Video List */
+            .video-list {
+                grid-template-columns: 1fr;
+            }
+
+            /* Auth Container */
+            .auth-container {
+                padding: 1.25rem;
+                margin: 1rem auto;
+            }
+
+            .countdown-timer {
+                gap: 0.5rem;
+            }
+
+            .countdown-item {
+                min-width: 60px;
+                padding: 0.5rem;
+            }
+
+            .countdown-value {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            /* Tablet Optimizations */
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .product-detail-container {
+                flex-direction: row;
+            }
+
+            .product-detail-image,
+            .product-detail-info {
+                min-width: 0;
+            }
+
+            .video-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-links {
+                gap: 0.5rem;
+            }
+
+            .nav-links li {
+                margin-left: 0;
+            }
+
+            .nav-links a {
+                padding: 0.5rem 0.75rem;
+            }
+        }
+
+        /* Large Desktop */
+        @media (min-width: 1200px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .video-list {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* iOS Safari Specific Fixes */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+            
+            .video-player {
+                -webkit-transform: translateZ(0);
+            }
+            
+            input, textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <header>
+        <nav>
+            <div class="logo">
+                <i class="fas fa-rocket"></i>
+                <span data-translate="brand">HT Service</span>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#" class="nav-link active" data-page="home" data-translate="home">Home</a></li>
+                <li><a href="#" class="nav-link" data-page="products" data-translate="products">Products</a></li>
+                <li><a href="#" class="nav-link" data-page="offer" data-translate="offer">Special Offer</a></li>
+                <li><a href="#" class="nav-link" data-page="video" data-translate="video">Video</a></li>
+                <li><a href="#" class="nav-link" data-page="contact" data-translate="contact">Contact</a></li>
+                <li id="auth-nav-item" style="display: none;">
+                    <div class="auth-user" id="auth-user">
+                        <div class="user-avatar" id="user-avatar">U</div>
+                        <span id="user-name">User</span>
+                    </div>
+                </li>
+            </ul>
+            
+            <div class="header-controls">
+                <div id="auth-controls" style="display: none;">
+                    <button class="logout-btn" id="logout-btn">Logout</button>
+                </div>
+                <button class="share-icon" id="share-website" aria-label="Share website">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+                <button class="settings-icon" id="settings-icon" aria-label="Open settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <div class="hero">
+                <h1 data-translate="welcome">Welcome to HT Service</h1>
+                <p data-translate="welcome_desc">Discover innovative products that will transform your daily life.</p>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="see-video-home" aria-label="Watch video">
+                        <i class="fas fa-play-circle"></i> <span data-translate="see_video">See Video</span>
+                    </button>
+                    <button class="btn btn-secondary" id="buy-product-home" aria-label="Buy product">
+                        <i class="fas fa-shopping-cart"></i> <span data-translate="buy_product">Buy Product</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="products-grid">
+                <!-- Product cards will be dynamically loaded -->
+            </div>
+        </section>
+
+        <!-- Products Page -->
+        <section id="products" class="page">
+            <div class="hero">
+                <h1 data-translate="our_products">Our Products</h1>
+                <p data-translate="products_desc">Explore our complete range of innovative tech products.</p>
+            </div>
+            
+            <div class="filter-container">
+                <div class="filter-group">
+                    <input type="text" id="search-input" class="filter-input" data-translate="search_placeholder" placeholder="Search products..." aria-label="Search products">
+                    <select id="brand-filter" class="filter-select" aria-label="Filter by brand">
+                        <option value="" data-translate="all_brands">All Brands</option>
+                        <!-- Brands will be loaded dynamically -->
+                    </select>
+                    <select id="category-filter" class="filter-select" aria-label="Filter by category">
+                        <option value="" data-translate="all_categories">All Categories</option>
+                        <!-- Categories will be loaded dynamically -->
+                    </select>
+                    <div class="btn-group">
+                        <button class="filter-btn" id="apply-filters" data-translate="apply_filters" aria-label="Apply filters">Apply Filters</button>
+                        <button class="filter-btn" id="reset-filters" style="background-color: #6c757d;" data-translate="reset" aria-label="Reset filters">Reset</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="products-grid" id="products-container">
+                <!-- Products will be dynamically loaded -->
+            </div>
+            
+            <div id="pagination-controls" style="display: none; text-align: center; margin-top: 2rem;">
+                <button id="prev-page" class="btn btn-secondary">Previous</button>
+                <span id="page-info" style="margin: 0 1rem;">Page 1 of 1</span>
+                <button id="next-page" class="btn btn-secondary">Next</button>
+            </div>
+        </section>
+
+        <!-- Product Detail Page -->
+        <section id="product-detail" class="page">
+            <div class="hero">
+                <h1 id="product-detail-title">Product Details</h1>
+                <p id="product-detail-subtitle">Complete information about our product</p>
+            </div>
+            
+            <div class="product-detail-container">
+                <div class="product-detail-image">
+                    <img id="product-detail-img" src="" alt="Product Image" loading="lazy">
+                </div>
+                <div class="product-detail-info">
+                    <h1 id="product-detail-name">Product Name</h1>
+                    <div class="product-detail-price" id="product-detail-price">PKR0.00</div>
+                    <div class="product-detail-description" id="product-detail-description">
+                        Product description will appear here.
+                    </div>
+                    
+                    <div class="product-features">
+                        <h3 data-translate="key_features">Key Features</h3>
+                        <ul id="product-features-list">
+                            <!-- Features will be dynamically loaded -->
+                        </ul>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="see-video-detail" aria-label="Watch product video">
+                            <i class="fas fa-play-circle"></i> <span data-translate="see_video">See Video</span>
+                        </button>
+                        <button class="btn btn-secondary" id="buy-now-detail" aria-label="Buy now">
+                            <i class="fas fa-shopping-cart"></i> <span data-translate="buy_now">Buy Now</span>
+                        </button>
+                        <button class="btn btn-whatsapp" id="share-detail" aria-label="Share product">
+                            <i class="fab fa-whatsapp"></i> <span data-translate="share">Share</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Special Offer Page -->
+        <section id="offer" class="page">
+            <div class="hero">
+                <h1 data-translate="special_offer">Special Limited Time Offer</h1>
+                <p data-translate="offer_desc">Don't miss our exclusive promotion with incredible savings.</p>
+            </div>
+            
+            <div class="offer-banner" id="offer-banner">
+                <h2 id="offer-percentage">50% OFF</h2>
+                <p id="offer-details" data-translate="offer_details">On all HT Service products for the next 48 hours only!</p>
+                
+                <div class="countdown-timer" id="countdown-timer">
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="days">00</span>
+                        <span class="countdown-label">Days</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="hours">00</span>
+                        <span class="countdown-label">Hours</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="minutes">00</span>
+                        <span class="countdown-label">Minutes</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="seconds">00</span>
+                        <span class="countdown-label">Seconds</span>
+                    </div>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="see-video-offer" aria-label="Watch offer video">
+                        <i class="fas fa-play-circle"></i> <span data-translate="see_video">See Video</span>
+                    </button>
+                    <button class="btn btn-secondary" id="buy-product-offer" aria-label="Buy now">
+                        <i class="fas fa-shopping-cart"></i> <span data-translate="buy_now">Buy Now</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="offer-features" id="offer-features">
+                <div class="feature">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3 data-translate="free_shipping">Free Shipping</h3>
+                    <p data-translate="free_shipping_desc">Free worldwide delivery</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-lock"></i>
+                    <h3 data-translate="secure_payment">Secure Payment</h3>
+                    <p data-translate="secure_payment_desc">Your payment is safe</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-undo"></i>
+                    <h3 data-translate="return_policy">30-Day Return</h3>
+                    <p data-translate="return_policy_desc">Return within 30 days</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-headset"></i>
+                    <h3 data-translate="support">24/7 Support</h3>
+                    <p data-translate="support_desc">We're here to help</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Video Page -->
+        <section id="video" class="page">
+            <div class="hero">
+                <h1 data-translate="product_videos">Product Videos</h1>
+                <p data-translate="videos_desc">Watch our product demonstrations and see how HT Service can transform your daily routine.</p>
+            </div>
+            
+            <div class="video-player-container">
+                <div class="video-player" id="main-video-player">
+                    <video id="video-element" controls>
+                        <source src="" type="video/mp4">
+                    </video>
+                        <h3 id="video-title"></h3>
+                        <p id="video-description"></p>
+
+                    <div class="video-controls">
+                        <button class="play-pause-btn" id="play-pause-btn" aria-label="Play/Pause">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <div class="progress-bar" id="progress-bar" aria-label="Video progress">
+                            <div class="progress" id="progress"></div>
+                        </div>
+                        <div class="time-display" id="time-display">0:00 / 0:00</div>
+                        <div class="volume-control">
+                            <i class="fas fa-volume-up"></i>
+                            <input type="range" min="0" max="100" value="100" class="volume-slider" id="volume-slider" aria-label="Volume control">
+                        </div>
+                        <button class="speed-btn" id="speed-btn" aria-label="Playback speed">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </button>
+                        <div class="speed-options" id="speed-options">
+                            <button class="speed-option" data-speed="0.5">0.5x</button>
+                            <button class="speed-option" data-speed="0.75">0.75x</button>
+                            <button class="speed-option" data-speed="1" data-selected="true">1x</button>
+                            <button class="speed-option" data-speed="1.25">1.25x</button>
+                            <button class="speed-option" data-speed="1.5">1.5x</button>
+                            <button class="speed-option" data-speed="2">2x</button>
+                        </div>
+                        <button class="fullscreen-btn" id="fullscreen-btn" aria-label="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="video-info">
+                    <h3 id="video-title">HT Service X1 - Complete Overview</h3>
+                    <p id="video-description">This video demonstrates all the key features of our flagship product.</p>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="buy-product-video" aria-label="Buy product">
+                            <i class="fas fa-shopping-cart"></i> <span data-translate="buy_now">Buy Now</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="video-list" id="video-list">
+                <!-- Video list will be dynamically loaded -->
+            </div>
+        </section>
+
+        <!-- Contact Page -->
+        <section id="contact" class="page">
+            <div class="hero">
+                <h1 data-translate="contact_us">Contact Us</h1>
+                <p data-translate="contact_desc">Have questions or need support? Get in touch with our team.</p>
+            </div>
+            
+            <div class="form-container">
+                <div class="form-message" id="form-message"></div>
+                <form id="contact-form">
+                    <div class="form-group">
+                        <label for="name" data-translate="full_name">Full Name *</label>
+                        <input type="text" id="name" class="form-control" required aria-required="true">
+                        <div class="error-message" id="name-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" data-translate="email">Email Address *</label>
+                        <input type="email" id="email" class="form-control" required aria-required="true" inputmode="email">
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone" data-translate="phone">Phone Number</label>
+                        <input type="tel" id="phone" class="form-control" inputmode="tel">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject" data-translate="subject">Subject *</label>
+                        <input type="text" id="subject" class="form-control" required aria-required="true">
+                        <div class="error-message" id="subject-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message" data-translate="message">Message *</label>
+                        <textarea id="message" class="form-control" rows="5" required aria-required="true"></textarea>
+                        <div class="error-message" id="message-error"></div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" aria-label="Send message">
+                            <i class="fas fa-paper-plane"></i> <span data-translate="send_message">Send Message</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Auth Page -->
+        <section id="auth" class="page">
+            <div class="hero">
+                <h1 data-translate="account">Account</h1>
+                <p data-translate="account_desc">Sign in or create an account to access exclusive features.</p>
+            </div>
+            
+            <div class="auth-container" id="auth-container">
+                <!-- This will be populated by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+<!-- In index.html, update mobile bottom navigation section -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+        <div class="mobile-nav-items">
+            <a href="#" class="mobile-nav-item active" data-page="home" aria-label="Home">
+                <i class="fas fa-home"></i>
+                <span data-translate="home">Home</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="products" aria-label="Products">
+                <i class="fas fa-box"></i>
+                <span data-translate="products">Products</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="offer" aria-label="Special Offer">
+                <i class="fas fa-gift"></i>
+                <span data-translate="offer">Offer</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="video" aria-label="Videos">
+                <i class="fas fa-video"></i>
+                <span data-translate="video">Video</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="contact" aria-label="Contact">
+                <i class="fas fa-envelope"></i>
+                <span data-translate="contact">Contact</span>
+            </a>
+            </div>
+        </nav>
+    </nav>
+
+    <footer>
+        <p>&copy; 2026 <span data-translate="brand">Hamza Trader Web Service</span>. <span data-translate="rights_reserved">All rights reserved.</span></p>
+        <p data-translate="contact_info">Contact: info@htservice.com | +92 308 2528844</p>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settings-modal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2><i class="fas fa-cog"></i> <span data-translate="settings">Settings</span></h2>
+                <button class="close-settings" id="close-settings" aria-label="Close settings">&times;</button>
+            </div>
+            
+            <div class="settings-tabs hide-scrollbar">
+                <button class="settings-tab active" data-tab="appearance" data-translate="appearance">Appearance</button>
+                <button class="settings-tab" data-tab="display" data-translate="display">Display</button>
+                <button class="settings-tab" data-tab="language" data-translate="language">Language</button>
+                <button class="settings-tab" data-tab="advanced" data-translate="advanced">Advanced</button>
+            </div>
+            
+            <div class="tab-content active" id="appearance-tab">
+                <div class="setting-group">
+                    <h3><i class="fas fa-palette"></i> <span data-translate="theme">Theme</span></h3>
+                    <div class="theme-options">
+                        <div class="theme-option active" data-theme="default">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);"></div>
+                            <span data-translate="default">Default</span>
+                        </div>
+                        <div class="theme-option" data-theme="light">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);"></div>
+                            <span data-translate="light">Light</span>
+                        </div>
+                        <div class="theme-option" data-theme="dark">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);"></div>
+                            <span data-translate="dark">Dark</span>
+                        </div>
+                        <div class="theme-option" data-theme="nature">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);"></div>
+                            <span data-translate="nature">Nature</span>
+                        </div>
+                        <div class="theme-option" data-theme="ocean">
+                            <div class="theme-preview" style="background: linear-gradient(135deg, #0066cc 0%, #00bcd4 100%);"></div>
+                            <span data-translate="ocean">Ocean</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3><i class="fas fa-font"></i> <span data-translate="font_family">Font Family</span></h3>
+                    <div class="font-options">
+                        <div class="font-option active" data-font="sans-serif" data-translate="sans_serif">Sans Serif</div>
+                        <div class="font-option font-serif" data-font="serif" data-translate="serif">Serif</div>
+                        <div class="font-option font-monospace" data-font="monospace" data-translate="monospace">Monospace</div>
+                        <div class="font-option font-jameel" data-font="jameel" data-translate="jameel_noori">Jameel Noori</div>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3><i class="fas fa-text-height"></i> <span data-translate="font_size">Font Size</span></h3>
+                    <div class="slider-container">
+                        <label data-translate="size">Size:</label>
+                        <input type="range" min="12" max="24" value="16" class="display-slider" id="font-size-slider" aria-label="Font size">
+                        <span class="slider-value" id="font-size-value">16px</span>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3><i class="fas fa-border-all"></i> <span data-translate="border_radius">Border Radius</span></h3>
+                    <div class="slider-container">
+                        <label data-translate="radius">Radius:</label>
+                        <input type="range" min="0" max="20" value="10" class="display-slider" id="border-radius-slider" aria-label="Border radius">
+                        <span class="slider-value" id="border-radius-value">10px</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="display-tab">
+                <div class="setting-group">
+                    <h3><i class="fas fa-sun"></i> <span data-translate="brightness">Brightness</span></h3>
+                    <div class="slider-container">
+                        <label data-translate="brightness">Brightness:</label>
+                        <input type="range" min="0" max="200" value="100" class="display-slider" id="brightness-slider" aria-label="Brightness">
+                        <span class="slider-value" id="brightness-value">100%</span>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3><i class="fas fa-adjust"></i> <span data-translate="contrast">Contrast</span></h3>
+                    <div class="slider-container">
+                        <label data-translate="contrast">Contrast:</label>
+                        <input type="range" min="0" max="200" value="100" class="display-slider" id="contrast-slider" aria-label="Contrast">
+                        <span class="slider-value" id="contrast-value">100%</span>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3><i class="fas fa-tint"></i> <span data-translate="saturation">Saturation</span></h3>
+                    <div class="slider-container">
+                        <label data-translate="saturation">Saturation:</label>
+                        <input type="range" min="0" max="200" value="100" class="display-slider" id="saturation-slider" aria-label="Saturation">
+                        <span class="slider-value" id="saturation-value">100%</span>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3><i class="fas fa-bolt"></i> <span data-translate="animation_speed">Animation Speed</span></h3>
+                    <div class="slider-container">
+                        <label data-translate="speed">Speed:</label>
+                        <input type="range" min="0" max="5" step="0.1" value="0.3" class="display-slider" id="animation-speed-slider" aria-label="Animation speed">
+                        <span class="slider-value" id="animation-speed-value">0.3s</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="language-tab">
+                <div class="setting-group">
+                    <h3><i class="fas fa-language"></i> <span data-translate="language">Language</span></h3>
+                    <div class="language-options">
+                        <div class="language-option active" data-lang="en">
+                            <i class="fas fa-flag-usa"></i> <span data-translate="english">English</span>
+                        </div>
+                        <div class="language-option" data-lang="ur">
+                            <i class="fas fa-flag"></i> <span data-translate="urdu">Urdu</span>
+                        </div>
+                        <div class="language-option" data-lang="ru">
+                            <i class="fas fa-flag"></i> <span data-translate="roman_urdu">Roman Urdu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="advanced-tab">
+                <div class="setting-group">
+                    <h3><i class="fas fa-database"></i> <span data-translate="data_management">Data Management</span></h3>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="export-data" aria-label="Export data">
+                            <i class="fas fa-download"></i> <span data-translate="export_data">Export Data</span>
+                        </button>
+                        <button class="btn btn-secondary" id="import-data" aria-label="Import data">
+                            <i class="fas fa-upload"></i> <span data-translate="import_data">Import Data</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3><i class="fas fa-trash-alt"></i> <span data-translate="reset_settings">Reset Settings</span></h3>
+                    <p data-translate="reset_warning">This will reset all settings to their default values.</p>
+                    <button class="reset-btn" id="reset-settings" aria-label="Reset all settings">
+                        <i class="fas fa-redo"></i> <span data-translate="reset_all">Reset All Settings</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <span id="notification-text">Settings saved successfully!</span>
+    </div>
+
+    <!-- Firebase and App Configuration -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+            appId: "YOUR_FIREBASE_APP_ID"
+        };
+
+        // EmailJS Configuration
+        const emailjsConfig = {
+            serviceID: "YOUR_EMAILJS_SERVICE_ID",
+            templateID: "YOUR_EMAILJS_TEMPLATE_ID",
+            userID: "YOUR_EMAILJS_USER_ID"
+        };
+
+        // Offer Configuration
+        const offerConfig = {
+            active: true,
+            percentage: 50,
+            startDate: "2026-01-01T00:00:00", // Offer start date
+            endDate: "2026-01-31T23:59:59",    // Offer end date
+            title: "Year End Special",
+            description: "Huge discounts on all products!"
+        };
+    </script>
+
+    <!-- Main Application Script -->
+     <script src="firebase-setup.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
