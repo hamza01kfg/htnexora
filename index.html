@@ -18,7 +18,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6a11cb">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     <link rel="icon" href="icons/icon-192.png">
@@ -27,7 +27,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
     
     <!-- Jameel Noori Font -->
-    <link href="https://fonts.cdnfonts.com/css/jameel-noori-nastaleeq" rel="stylesheet">
+    <link href="https://urdulabs.com/fonts/jameel-noori-nastaleeq" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -616,8 +616,8 @@
         }
 
         .product-detail-image img {
-            width: 50%;
-            height: 50%;
+            width: 100%;
+            height: auto;
             display: block;
         }
 
@@ -1969,30 +1969,30 @@
                 <form id="contact-form">
                     <div class="form-group">
                         <label for="name" data-translate="full_name">Full Name *</label>
-                        <input type="text" id="name" class="form-control" required aria-required="true">
+                        <input type="text" id="name" class="form-control" name="from_name" required aria-required="true">
                         <div class="error-message" id="name-error"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="email" data-translate="email">Email Address *</label>
-                        <input type="email" id="email" class="form-control" required aria-required="true" inputmode="email">
+                        <input type="email" id="email" class="form-control" name="from_email" required aria-required="true" inputmode="email">
                         <div class="error-message" id="email-error"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="phone" data-translate="phone">Phone Number</label>
-                        <input type="tel" id="phone" class="form-control" inputmode="tel">
+                        <input type="tel" id="phone" class="form-control" name="phone" inputmode="tel">
                     </div>
                     
                     <div class="form-group">
                         <label for="subject" data-translate="subject">Subject *</label>
-                        <input type="text" id="subject" class="form-control" required aria-required="true">
+                        <input type="text" id="subject" class="form-control" name="subject" required aria-required="true">
                         <div class="error-message" id="subject-error"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="message" data-translate="message">Message *</label>
-                        <textarea id="message" class="form-control" rows="5" required aria-required="true"></textarea>
+                        <textarea id="message" class="form-control" name="message" rows="5" required aria-required="true"></textarea>
                         <div class="error-message" id="message-error"></div>
                     </div>
                     
@@ -2204,37 +2204,6 @@
     <div class="notification" id="notification">
         <span id="notification-text">Settings saved successfully!</span>
     </div>
-
-    <!-- Firebase and App Configuration -->
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_API_KEY",
-            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
-            projectId: "YOUR_FIREBASE_PROJECT_ID",
-            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
-            appId: "YOUR_FIREBASE_APP_ID"
-        };
-
-        // EmailJS Configuration
-        const emailjsConfig = {
-            serviceID: "YOUR_EMAILJS_SERVICE_ID",
-            templateID: "YOUR_EMAILJS_TEMPLATE_ID",
-            userID: "YOUR_EMAILJS_USER_ID"
-        };
-
-        // Offer Configuration
-        const offerConfig = {
-            active: true,
-            percentage: 50,
-            startDate: "2026-01-01T00:00:00", // Offer start date
-            endDate: "2026-01-31T23:59:59",    // Offer end date
-            title: "Year End Special",
-            description: "Huge discounts on all products!"
-        };
-    </script>
-
     <!-- Main Application Script -->
      <script src="firebase-setup.js"></script>
     <script src="app.js"></script>
