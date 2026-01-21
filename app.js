@@ -282,22 +282,70 @@ const translations = {
         // Footer
         rights_reserved: "جملہ حقوق محفوظ ہیں۔",
         contact_info: "رابطہ: info@htservice.com | +92 308 2528844"
+    },
+    ru: {
+        // Roman Urdu - Same as English with Roman Urdu script
+        brand: "HT Service",
+        home: "Home",
+        products: "Products",
+        offer: "Special Offer",
+        video: "Video",
+        contact: "Contact",
+        account: "Account",
+        login: "Login",
+        signup: "Sign Up",
+        logout: "Logout",
+        
+        // Home Page
+        welcome: "HT Service mein khush aamdeed",
+        welcome_desc: "Naye products daryaft karein jo aapki zindagi ko badal denge.",
+        see_video: "Video Dekhein",
+        buy_product: "Product Khareedein",
+        bestseller: "Bestseller",
+        new: "Naya",
+        sale: "Sale",
+        buy_now: "Abhi Khareedein",
+        share: "Share Karein",
+        
+        // Products Page
+        our_products: "Hamare Products",
+        products_desc: "Hamare tamam products ki range dekhein.",
+        search_placeholder: "Products talash karein...",
+        all_brands: "Tamam Brands",
+        all_categories: "Tamam Categories",
+        apply_filters: "Filters Lagayein",
+        reset: "Reset",
+        loading_products: "Products load ho rahe hain...",
+        no_products: "Koi products nahi mile.",
+        
+        // Other translations same as English...
+        contact_us: "Contact Us",
+        contact_desc: "Sawal hain? Hamari team se contact karein.",
+        full_name: "Full Name",
+        email: "Email Address",
+        phone: "Phone Number",
+        message: "Message",
+        send_message: "Message Bhejein"
     }
 };
 
 // Initialize Firebase
 function initializeFirebase() {
     try {
-        firebaseApp = firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        
-        // Listen for auth state changes
-        auth.onAuthStateChanged((user) => {
-            currentUser = user;
-            updateAuthUI();
-        });
-        
-        console.log("Firebase initialized successfully");
+        if (typeof firebase !== 'undefined' && firebaseConfig) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            
+            // Listen for auth state changes
+            auth.onAuthStateChanged((user) => {
+                currentUser = user;
+                updateAuthUI();
+            });
+            
+            console.log("Firebase initialized successfully");
+        } else {
+            console.warn("Firebase not available or config missing");
+        }
     } catch (error) {
         console.error("Firebase initialization error:", error);
     }
@@ -306,8 +354,12 @@ function initializeFirebase() {
 // Initialize EmailJS
 function initializeEmailJS() {
     try {
-        emailjs.init(emailjsConfig.userID);
-        console.log("EmailJS initialized successfully");
+        if (typeof emailjs !== 'undefined' && emailjsConfig) {
+            emailjs.init(emailjsConfig.userID);
+            console.log("EmailJS initialized successfully");
+        } else {
+            console.warn("EmailJS not available or config missing");
+        }
     } catch (error) {
         console.error("EmailJS initialization error:", error);
     }
@@ -955,7 +1007,8 @@ async function handleContactForm(e) {
                 subject: formData.subject,
                 message: formData.message,
                 timestamp: formData.timestamp
-            }
+            },
+            emailjsConfig.userID
         );
         
         showLoading(false);
@@ -1031,6 +1084,11 @@ function validateContactForm(formData) {
 
 // Change language
 function changeLanguage(lang) {
+    if (!translations[lang]) {
+        console.warn(`Language ${lang} not found, defaulting to English`);
+        lang = 'en';
+    }
+    
     currentLanguage = lang;
     const translation = translations[lang];
     
@@ -1054,7 +1112,7 @@ function changeLanguage(lang) {
     // Save language preference
     localStorage.setItem('language', lang);
     
-    showNotification(`Language changed to ${lang === 'en' ? 'English' : 'Urdu'}`);
+    showNotification(`Language changed to ${lang === 'en' ? 'English' : (lang === 'ur' ? 'Urdu' : 'Roman Urdu')}`);
 }
 
 // Show loading spinner
