@@ -1,5 +1,5 @@
 // HT Service - Main Application Script
-// This file contains all the enhanced functionality with product videos
+// This file contains all the enhanced functionality with product videos and reviews
 
 // Enhanced Mobile Detection
 const isMobile = {
@@ -32,6 +32,9 @@ let offerTimer = null;
 let isPlaying = false;
 let currentVideoProductId = null;
 let videosFromProducts = [];
+
+// Reviews State
+let productReviews = {};
 
 // Firebase and EmailJS Initialization
 let firebaseApp = null;
@@ -282,90 +285,165 @@ const translations = {
         // Footer
         rights_reserved: "جملہ حقوق محفوظ ہیں۔",
         contact_info: "رابطہ: info@htservice.com | +92 308 2528844"
-    },
-    ru: {
-        // Roman Urdu - Same as English with Roman Urdu script
-        brand: "HT Service",
-        home: "Home",
-        products: "Products",
-        offer: "Special Offer",
-        video: "Video",
-        contact: "Contact",
-        account: "Account",
-        login: "Login",
-        signup: "Sign Up",
-        logout: "Logout",
-        
-        // Home Page
-        welcome: "HT Service mein khush aamdeed",
-        welcome_desc: "Naye products daryaft karein jo aapki zindagi ko badal denge.",
-        see_video: "Video Dekhein",
-        buy_product: "Product Khareedein",
-        bestseller: "Bestseller",
-        new: "Naya",
-        sale: "Sale",
-        buy_now: "Abhi Khareedein",
-        share: "Share Karein",
-        
-        // Products Page
-        our_products: "Hamare Products",
-        products_desc: "Hamare tamam products ki range dekhein.",
-        search_placeholder: "Products talash karein...",
-        all_brands: "Tamam Brands",
-        all_categories: "Tamam Categories",
-        apply_filters: "Filters Lagayein",
-        reset: "Reset",
-        loading_products: "Products load ho rahe hain...",
-        no_products: "Koi products nahi mile.",
-        
-        // Other translations same as English...
-        contact_us: "Contact Us",
-        contact_desc: "Sawal hain? Hamari team se contact karein.",
-        full_name: "Full Name",
-        email: "Email Address",
-        phone: "Phone Number",
-        message: "Message",
-        send_message: "Message Bhejein"
     }
 };
 
-// Initialize Firebase
+// ==================== REVIEWS FUNCTIONS ====================
+function loadReviewsFromStorage() {
+    const stored = localStorage.getItem('product_reviews');
+    if (stored) {
+        productReviews = JSON.parse(stored);
+    } else {
+        // Sample reviews for demonstration
+        productReviews = {
+            1: [
+                { name: "Ali", rating: 5, comment: "Excellent microphone! Crystal clear sound.", date: "2025-03-15" },
+                { name: "Sara", rating: 4, comment: "Good value for money.", date: "2025-03-10" }
+            ],
+            2: [
+                { name: "Hamza", rating: 5, comment: "Best headphones I've ever used.", date: "2025-03-12" }
+            ]
+        };
+        saveReviewsToStorage();
+    }
+}
+
+function saveReviewsToStorage() {
+    localStorage.setItem('product_reviews', JSON.stringify(productReviews));
+}
+
+function getAverageRating(productId) {
+    const reviews = productReviews[productId] || [];
+    if (reviews.length === 0) return null;
+    const total = reviews.reduce((sum, r) => sum + r.rating, 0);
+    return (total / reviews.length).toFixed(1);
+}
+
+function displayReviews(productId) {
+    const reviewsContainer = document.getElementById('reviews-list');
+    if (!reviewsContainer) return;
+    
+    const reviews = productReviews[productId] || [];
+    if (reviews.length === 0) {
+        reviewsContainer.innerHTML = '<p>No reviews yet. Be the first to review!</p>';
+        return;
+    }
+    
+    reviewsContainer.innerHTML = reviews.map(review => `
+        <div class="review-item">
+            <div class="review-header">
+                <span class="reviewer-name">${escapeHtml(review.name)}</span>
+                <span class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</span>
+                <span class="review-date">${review.date}</span>
+            </div>
+            <div class="review-comment">${escapeHtml(review.comment)}</div>
+        </div>
+    `).join('');
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+function setupStarRating() {
+    const stars = document.querySelectorAll('#star-rating span');
+    const ratingInput = document.getElementById('review-rating');
+    if (!stars.length || !ratingInput) return;
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const value = parseInt(star.getAttribute('data-value'), 10);
+            ratingInput.value = value;
+            stars.forEach(s => {
+                if (parseInt(s.getAttribute('data-value'), 10) <= value) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        });
+    });
+}
+
+function setupReviewForm(productId) {
+    const form = document.getElementById('review-form');
+    if (!form) return;
+    
+    form.removeEventListener('submit', handleReviewSubmit);
+    form.onsubmit = (e) => handleReviewSubmit(e, productId);
+}
+
+async function handleReviewSubmit(e, productId) {
+    e.preventDefault();
+    const name = document.getElementById('review-name').value.trim();
+    const rating = parseInt(document.getElementById('review-rating').value, 10);
+    const comment = document.getElementById('review-comment').value.trim();
+    
+    if (!name || !comment) {
+        showNotification('Please fill all fields', 'error');
+        return;
+    }
+    
+    const newReview = {
+        name: name,
+        rating: rating,
+        comment: comment,
+        date: new Date().toISOString().split('T')[0]
+    };
+    
+    if (!productReviews[productId]) productReviews[productId] = [];
+    productReviews[productId].unshift(newReview);
+    saveReviewsToStorage();
+    
+    displayReviews(productId);
+    document.getElementById('review-form').reset();
+    document.getElementById('review-rating').value = '5';
+    document.querySelectorAll('#star-rating span').forEach(star => {
+        star.classList.remove('active');
+        if (star.getAttribute('data-value') == 5) star.classList.add('active');
+    });
+    
+    // Refresh product cards if visible
+    if (document.getElementById('products-container')) {
+        displayProducts(); // refresh products page
+    }
+    if (document.querySelector('.products-grid:not(#products-container)')) {
+        displayProducts(); // refresh home page products
+    }
+    
+    showNotification('Review submitted successfully!');
+}
+
+// ==================== FIREBASE & AUTH ====================
 function initializeFirebase() {
     try {
-        if (typeof firebase !== 'undefined' && firebaseConfig) {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            
-            // Listen for auth state changes
-            auth.onAuthStateChanged((user) => {
-                currentUser = user;
-                updateAuthUI();
-            });
-            
-            console.log("Firebase initialized successfully");
-        } else {
-            console.warn("Firebase not available or config missing");
-        }
+        firebaseApp = firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            updateAuthUI();
+        });
+        
+        console.log("Firebase initialized successfully");
     } catch (error) {
         console.error("Firebase initialization error:", error);
     }
 }
 
-// Initialize EmailJS
 function initializeEmailJS() {
     try {
-        if (typeof emailjs !== 'undefined' && emailjsConfig) {
-            emailjs.init(emailjsConfig.userID);
-            console.log("EmailJS initialized successfully");
-        } else {
-            console.warn("EmailJS not available or config missing");
-        }
+        emailjs.init(emailjsConfig.userID);
+        console.log("EmailJS initialized successfully");
     } catch (error) {
         console.error("EmailJS initialization error:", error);
     }
 }
 
-// Update authentication UI
 function updateAuthUI() {
     const authNavItem = document.getElementById('auth-nav-item');
     const authControls = document.getElementById('auth-controls');
@@ -373,11 +451,9 @@ function updateAuthUI() {
     const userName = document.getElementById('user-name');
     
     if (currentUser) {
-        // User is logged in
         if (authNavItem) authNavItem.style.display = 'block';
         if (authControls) authControls.style.display = 'flex';
         
-        // Update user info
         if (userAvatar) {
             const initials = currentUser.email.charAt(0).toUpperCase();
             userAvatar.textContent = initials;
@@ -388,13 +464,11 @@ function updateAuthUI() {
             userName.textContent = displayName;
         }
     } else {
-        // User is logged out
         if (authNavItem) authNavItem.style.display = 'none';
         if (authControls) authControls.style.display = 'none';
     }
 }
 
-// Auth functions
 async function signUp(email, password, displayName) {
     try {
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
@@ -433,7 +507,7 @@ async function logout() {
     }
 }
 
-// Load products from JSON file
+// ==================== PRODUCTS ====================
 async function loadProducts() {
     try {
         showLoading(true);
@@ -447,7 +521,6 @@ async function loadProducts() {
         const data = await response.json();
         allProducts = data.products;
         
-        // Extract brands and categories
         brands.clear();
         categories.clear();
         
@@ -456,17 +529,13 @@ async function loadProducts() {
             if (product.category) categories.add(product.category);
         });
         
-        // Extract videos from products that have videoUrl
         videosFromProducts = allProducts.filter(product => product.videoUrl && product.videoUrl.trim() !== '');
         
-        // Update filter dropdowns
         updateFilterDropdowns();
         
-        // Load initial products
         filteredProducts = [...allProducts];
         displayProducts();
         
-        // Setup filter event listeners
         setupFilterEventListeners();
         
         showLoading(false);
@@ -474,13 +543,11 @@ async function loadProducts() {
         console.error("Error loading products:", error);
         showLoading(false);
         
-        // Fallback to sample products if JSON fails
         loadSampleProducts();
         setupFilterEventListeners();
     }
 }
 
-// Load sample products (fallback)
 function loadSampleProducts() {
     allProducts = [
         { 
@@ -542,7 +609,6 @@ function loadSampleProducts() {
         }
     ];
     
-    // Extract brands and categories
     brands.clear();
     categories.clear();
     
@@ -551,7 +617,6 @@ function loadSampleProducts() {
         if (product.category) categories.add(product.category);
     });
     
-    // Extract videos from products
     videosFromProducts = allProducts.filter(product => product.videoUrl && product.videoUrl.trim() !== '');
     
     updateFilterDropdowns();
@@ -559,14 +624,12 @@ function loadSampleProducts() {
     displayProducts();
 }
 
-// Update filter dropdowns
 function updateFilterDropdowns() {
     const brandFilter = document.getElementById('brand-filter');
     const categoryFilter = document.getElementById('category-filter');
     
     if (!brandFilter || !categoryFilter) return;
     
-    // Clear existing options (keep first option)
     while (brandFilter.options.length > 1) {
         brandFilter.remove(1);
     }
@@ -575,7 +638,6 @@ function updateFilterDropdowns() {
         categoryFilter.remove(1);
     }
     
-    // Add brand options
     brands.forEach(brand => {
         const option = document.createElement('option');
         option.value = brand;
@@ -583,7 +645,6 @@ function updateFilterDropdowns() {
         brandFilter.appendChild(option);
     });
     
-    // Add category options
     categories.forEach(category => {
         const option = document.createElement('option');
         option.value = category;
@@ -592,7 +653,6 @@ function updateFilterDropdowns() {
     });
 }
 
-// Display products with pagination
 function displayProducts() {
     const productsContainer = document.querySelector('#products .products-grid, #home .products-grid');
     if (!productsContainer) return;
@@ -606,23 +666,19 @@ function displayProducts() {
         return;
     }
     
-    // Calculate pagination
     const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
     const startIndex = (currentPage - 1) * productsPerPage;
     const endIndex = Math.min(startIndex + productsPerPage, filteredProducts.length);
     const pageProducts = filteredProducts.slice(startIndex, endIndex);
     
-    // Display products for current page
     pageProducts.forEach(product => {
         const productCard = createProductCard(product);
         productsContainer.appendChild(productCard);
     });
     
-    // Update pagination controls
     updatePaginationControls(totalPages);
 }
 
-// Create product card element
 function createProductCard(product) {
     const productCard = document.createElement('div');
     productCard.className = 'product-card';
@@ -631,13 +687,19 @@ function createProductCard(product) {
     productCard.setAttribute('tabindex', '0');
     productCard.setAttribute('aria-label', `View details for ${product.name}`);
     
-    // Check if product has video
     const hasVideo = product.videoUrl && product.videoUrl.trim() !== '';
     const seeVideoButton = hasVideo ? `
         <button class="btn btn-primary see-video" data-product-id="${product.id}" aria-label="Watch video for ${product.name}">
             <i class="fas fa-play-circle"></i> <span data-translate="see_video">See Video</span>
         </button>
     ` : '';
+    
+    const avgRating = getAverageRating(product.id);
+    const ratingHtml = avgRating ? `
+        <div class="product-rating">
+            <span>⭐ ${avgRating}</span> <span>(${productReviews[product.id]?.length || 0} reviews)</span>
+        </div>
+    ` : '<div class="product-rating">No reviews yet</div>';
     
     productCard.innerHTML = `
         ${product.badge ? `<div class="product-badge" data-translate="${product.badge.toLowerCase()}">${product.badge}</div>` : ''}
@@ -648,6 +710,7 @@ function createProductCard(product) {
             <h3>${product.name}</h3>
             <p>${product.description}</p>
             <div class="product-price">PKR${product.price.toFixed(2)}</div>
+            ${ratingHtml}
             <div class="product-actions">
                 ${seeVideoButton}
                 <button class="btn btn-whatsapp share-product" data-product="${product.name}" data-image="${product.image}" aria-label="Share ${product.name}">
@@ -657,7 +720,6 @@ function createProductCard(product) {
         </div>
     `;
     
-    // Add click/touch event for product detail
     productCard.addEventListener('click', () => {
         openProductDetail(product.id);
         closeMobileMenu();
@@ -670,7 +732,6 @@ function createProductCard(product) {
         }
     });
     
-    // Add event listeners for buttons
     if (hasVideo) {
         const seeVideoBtn = productCard.querySelector('.see-video');
         seeVideoBtn.addEventListener('click', (e) => {
@@ -689,7 +750,6 @@ function createProductCard(product) {
     return productCard;
 }
 
-// Update pagination controls
 function updatePaginationControls(totalPages) {
     const paginationControls = document.getElementById('pagination-controls');
     const prevButton = document.getElementById('prev-page');
@@ -709,7 +769,6 @@ function updatePaginationControls(totalPages) {
     prevButton.disabled = currentPage === 1;
     nextButton.disabled = currentPage === totalPages;
     
-    // Update button event listeners
     prevButton.onclick = () => {
         if (currentPage > 1) {
             currentPage--;
@@ -727,29 +786,16 @@ function updatePaginationControls(totalPages) {
     };
 }
 
-// Apply filters to products
 function applyFilters() {
-    console.log('applyFilters() called');
-    
     const searchInput = document.getElementById('search-input');
     const brandFilter = document.getElementById('brand-filter');
     const categoryFilter = document.getElementById('category-filter');
     
-    if (!searchInput || !brandFilter || !categoryFilter) {
-        console.log('Filter elements not found');
-        return;
-    }
+    if (!searchInput || !brandFilter || !categoryFilter) return;
     
     const searchTerm = searchInput.value.toLowerCase();
     const brandValue = brandFilter.value;
     const categoryValue = categoryFilter.value;
-    
-    console.log('Filter values:', {
-        searchTerm,
-        brandValue,
-        categoryValue,
-        totalProducts: allProducts.length
-    });
     
     filteredProducts = allProducts.filter(product => {
         const matchesSearch = !searchTerm || 
@@ -762,13 +808,10 @@ function applyFilters() {
         return matchesSearch && matchesBrand && matchesCategory;
     });
     
-    console.log('Filtered products count:', filteredProducts.length);
-    
     currentPage = 1;
     displayProducts();
 }
 
-// Reset filters
 function resetFilters() {
     const searchInput = document.getElementById('search-input');
     const brandFilter = document.getElementById('brand-filter');
@@ -783,20 +826,15 @@ function resetFilters() {
     displayProducts();
 }
 
-// Setup filter event listeners
 function setupFilterEventListeners() {
-    console.log('Setting up filter event listeners');
-    
     const applyFiltersBtn = document.getElementById('apply-filters');
     const resetFiltersBtn = document.getElementById('reset-filters');
     const searchInput = document.getElementById('search-input');
     
     if (applyFiltersBtn) {
-        // Remove existing listener to avoid duplicates
         applyFiltersBtn.removeEventListener('click', applyFilters);
         applyFiltersBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Apply Filters button clicked');
             applyFilters();
         });
     }
@@ -815,7 +853,6 @@ function setupFilterEventListeners() {
     }
 }
 
-// Handle search input with debounce
 function handleSearchInput() {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
@@ -823,12 +860,10 @@ function handleSearchInput() {
     }, 300);
 }
 
-// Open product detail
 function openProductDetail(productId) {
     const product = allProducts.find(p => p.id === productId);
     if (!product) return;
     
-    // Update product detail page
     document.getElementById('product-detail-title').textContent = product.name;
     document.getElementById('product-detail-subtitle').textContent = `${product.brand} - ${product.category || 'Premium Product'}`;
     document.getElementById('product-detail-img').src = product.image;
@@ -836,7 +871,6 @@ function openProductDetail(productId) {
     document.getElementById('product-detail-price').textContent = `PKR${product.price.toFixed(2)}`;
     document.getElementById('product-detail-description').textContent = product.description;
     
-    // Update features list
     const featuresList = document.getElementById('product-features-list');
     if (featuresList) {
         featuresList.innerHTML = '';
@@ -847,7 +881,6 @@ function openProductDetail(productId) {
         });
     }
     
-    // Update video button visibility
     const seeVideoDetailBtn = document.getElementById('see-video-detail');
     if (seeVideoDetailBtn) {
         if (product.videoUrl && product.videoUrl.trim() !== '') {
@@ -861,11 +894,14 @@ function openProductDetail(productId) {
         }
     }
     
-    // Navigate to product detail page
+    // Load reviews
+    displayReviews(product.id);
+    setupReviewForm(product.id);
+    setupStarRating();
+    
     navigateToPage('product-detail');
 }
 
-// Play product video
 function playProductVideo(productId) {
     const product = allProducts.find(p => p.id === productId);
     if (!product || !product.videoUrl || product.videoUrl.trim() === '') {
@@ -873,13 +909,9 @@ function playProductVideo(productId) {
         return;
     }
     
-    // Navigate to video page
     navigateToPage('video');
-    
-    // Set current video product ID
     currentVideoProductId = productId;
     
-    // Load and play the video after a short delay to ensure page is loaded
     setTimeout(() => {
         const video = videosFromProducts.find(v => v.id === productId);
         if (video) {
@@ -888,7 +920,7 @@ function playProductVideo(productId) {
     }, 300);
 }
 
-// Initialize countdown timer for offers
+// ==================== OFFER TIMER ====================
 function initializeCountdownTimer() {
     const offerBanner = document.getElementById('offer-banner');
     const offerFeatures = document.getElementById('offer-features');
@@ -903,15 +935,12 @@ function initializeCountdownTimer() {
     const endDate = new Date(offerConfig.endDate);
     const now = new Date();
     
-    // Update offer details
     const offerPercentage = document.getElementById('offer-percentage');
     const offerDetails = document.getElementById('offer-details');
     if (offerPercentage) offerPercentage.textContent = `${offerConfig.percentage}% OFF`;
     if (offerDetails) offerDetails.textContent = offerConfig.description;
     
-    // Check if offer is active
     if (now < startDate) {
-        // Offer hasn't started yet
         if (offerBanner) {
             offerBanner.innerHTML = `
                 <h2>Coming Soon!</h2>
@@ -919,7 +948,6 @@ function initializeCountdownTimer() {
             `;
         }
     } else if (now > endDate) {
-        // Offer has expired
         if (offerBanner) {
             offerBanner.innerHTML = `
                 <div class="offer-expired">
@@ -930,13 +958,11 @@ function initializeCountdownTimer() {
         }
         if (offerFeatures) offerFeatures.style.display = 'none';
     } else {
-        // Offer is active, start countdown
         updateCountdownTimer(endDate);
         offerTimer = setInterval(() => updateCountdownTimer(endDate), 1000);
     }
 }
 
-// Update countdown timer
 function updateCountdownTimer(endDate) {
     const now = new Date();
     const timeRemaining = endDate - now;
@@ -973,7 +999,7 @@ function updateCountdownTimer(endDate) {
     if (secondsElement) secondsElement.textContent = seconds.toString().padStart(2, '0');
 }
 
-// Handle contact form submission with EmailJS
+// ==================== CONTACT FORM ====================
 async function handleContactForm(e) {
     e.preventDefault();
     
@@ -987,7 +1013,6 @@ async function handleContactForm(e) {
         timestamp: new Date().toLocaleString()
     };
     
-    // Validate form
     if (!validateContactForm(formData)) {
         return;
     }
@@ -995,7 +1020,6 @@ async function handleContactForm(e) {
     try {
         showLoading(true);
         
-        // Send email using EmailJS
         const response = await emailjs.send(
             emailjsConfig.serviceID,
             emailjsConfig.templateID,
@@ -1007,22 +1031,17 @@ async function handleContactForm(e) {
                 subject: formData.subject,
                 message: formData.message,
                 timestamp: formData.timestamp
-            },
-            emailjsConfig.userID
+            }
         );
         
         showLoading(false);
         
         if (response.status === 200) {
-            // Show success message
             const messageDiv = document.getElementById('form-message');
             messageDiv.textContent = translations[currentLanguage].message_sent;
             messageDiv.className = 'form-message success';
-            
-            // Reset form
             form.reset();
             
-            // Hide message after 5 seconds
             setTimeout(() => {
                 messageDiv.className = 'form-message';
             }, 5000);
@@ -1037,27 +1056,22 @@ async function handleContactForm(e) {
         messageDiv.textContent = translations[currentLanguage].message_error;
         messageDiv.className = 'form-message error';
         
-        // Hide message after 5 seconds
         setTimeout(() => {
             messageDiv.className = 'form-message';
         }, 5000);
     }
 }
 
-// Validate contact form
 function validateContactForm(formData) {
     let isValid = true;
     
-    // Clear previous errors
     document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
     
-    // Validate name
     if (!formData.name.trim()) {
         document.getElementById('name-error').textContent = 'Name is required';
         isValid = false;
     }
     
-    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
         document.getElementById('email-error').textContent = 'Email is required';
@@ -1067,13 +1081,11 @@ function validateContactForm(formData) {
         isValid = false;
     }
     
-    // Validate subject
     if (!formData.subject.trim()) {
         document.getElementById('subject-error').textContent = 'Subject is required';
         isValid = false;
     }
     
-    // Validate message
     if (!formData.message.trim()) {
         document.getElementById('message-error').textContent = 'Message is required';
         isValid = false;
@@ -1082,17 +1094,11 @@ function validateContactForm(formData) {
     return isValid;
 }
 
-// Change language
+// ==================== LANGUAGE & UI ====================
 function changeLanguage(lang) {
-    if (!translations[lang]) {
-        console.warn(`Language ${lang} not found, defaulting to English`);
-        lang = 'en';
-    }
-    
     currentLanguage = lang;
     const translation = translations[lang];
     
-    // Update all translatable elements
     document.querySelectorAll('[data-translate]').forEach(element => {
         const key = element.getAttribute('data-translate');
         if (translation[key]) {
@@ -1104,30 +1110,22 @@ function changeLanguage(lang) {
         }
     });
     
-    // Update active language option
     document.querySelectorAll('.language-option').forEach(opt => opt.classList.remove('active'));
     const activeOption = document.querySelector(`.language-option[data-lang="${lang}"]`);
     if (activeOption) activeOption.classList.add('active');
     
-    // Save language preference
     localStorage.setItem('language', lang);
     
-    showNotification(`Language changed to ${lang === 'en' ? 'English' : (lang === 'ur' ? 'Urdu' : 'Roman Urdu')}`);
+    showNotification(`Language changed to ${lang === 'en' ? 'English' : 'Urdu'}`);
 }
 
-// Show loading spinner
 function showLoading(show) {
     const spinner = document.getElementById('loading-spinner');
     if (spinner) {
-        if (show) {
-            spinner.style.display = 'block';
-        } else {
-            spinner.style.display = 'none';
-        }
+        spinner.style.display = show ? 'block' : 'none';
     }
 }
 
-// Show notification
 function showNotification(message, type = 'success') {
     const notification = document.getElementById('notification');
     const notificationText = document.getElementById('notification-text');
@@ -1143,44 +1141,34 @@ function showNotification(message, type = 'success') {
     }
 }
 
-// Navigate to page
 function navigateToPage(pageId) {
-    // Update active states
     document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(l => l.classList.remove('active'));
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     
-    // Activate new page
     const pageElement = document.getElementById(pageId);
     if (pageElement) {
         pageElement.classList.add('active');
         
-        // Update navigation
         if (pageId !== 'product-detail' && pageId !== 'auth') {
             const navItem = document.querySelector(`[data-page="${pageId}"]`);
             if (navItem) navItem.classList.add('active');
         }
         
-        // Load page-specific content
         loadPageContent(pageId);
         
-        // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
-// Load page-specific content
 function loadPageContent(pageId) {
-    console.log('Loading page content for:', pageId);
     switch(pageId) {
         case 'home':
             loadProducts();
             break;
         case 'products':
             loadProducts();
-            // Force update of filter dropdowns
             setTimeout(() => {
                 updateFilterDropdowns();
-                // Make sure filter event listeners are attached
                 setupFilterEventListeners();
             }, 100);
             break;
@@ -1199,7 +1187,7 @@ function loadPageContent(pageId) {
     }
 }
 
-// Load product videos
+// ==================== VIDEO ====================
 function loadProductVideos() {
     const videoList = document.getElementById('video-list');
     if (!videoList) return;
@@ -1255,24 +1243,21 @@ function loadProductVideos() {
         videoList.appendChild(videoItem);
     });
     
-    // If we have a specific product video to play
     if (currentVideoProductId) {
         const product = videosFromProducts.find(p => p.id === currentVideoProductId);
         if (product) {
             setTimeout(() => {
                 playVideo(product);
-                currentVideoProductId = null; // Reset after playing
+                currentVideoProductId = null;
             }, 300);
         }
     } else if (videosFromProducts.length > 0) {
-        // Play first video by default
         setTimeout(() => {
             playVideo(videosFromProducts[0]);
         }, 300);
     }
 }
 
-// Play video from product
 function playVideo(product) {
     if (!product || !product.videoUrl) return;
     
@@ -1281,11 +1266,9 @@ function playVideo(product) {
     const videoDescription = document.getElementById('video-description');
     const buyProductVideoBtn = document.getElementById('buy-product-video');
     
-    // Update video info
     if (videoTitle) videoTitle.textContent = product.name;
     if (videoDescription) videoDescription.textContent = product.description;
     
-    // Update buy button to link to this product
     if (buyProductVideoBtn) {
         buyProductVideoBtn.onclick = () => {
             openProductDetail(product.id);
@@ -1293,16 +1276,13 @@ function playVideo(product) {
         };
     }
     
-    // Set video source
     if (videoElement) {
         videoElement.src = product.videoUrl;
         videoElement.load();
     }
     
-    // Update play button
     updatePlayButton();
     
-    // Highlight selected video
     document.querySelectorAll('.video-item').forEach(item => {
         item.classList.remove('selected');
         const itemProductId = parseInt(item.getAttribute('data-product-id'));
@@ -1314,7 +1294,6 @@ function playVideo(product) {
         }
     });
     
-    // Try to play the video
     setTimeout(() => {
         if (videoElement) {
             videoElement.play().then(() => {
@@ -1322,7 +1301,6 @@ function playVideo(product) {
                 updatePlayButton();
             }).catch(error => {
                 console.log("Video play failed, might require user interaction:", error);
-                // Show play button
                 const playPauseBtn = document.getElementById('play-pause-btn');
                 if (playPauseBtn) {
                     playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
@@ -1333,7 +1311,6 @@ function playVideo(product) {
     }, 100);
 }
 
-// Setup video player controls
 function setupVideoPlayer() {
     const videoElement = document.getElementById('video-element');
     const playPauseBtn = document.getElementById('play-pause-btn');
@@ -1347,23 +1324,19 @@ function setupVideoPlayer() {
     
     if (!videoElement || !playPauseBtn) return;
     
-    // Play/Pause button
     playPauseBtn.addEventListener('click', togglePlayPause);
     
-    // Progress bar
     videoElement.addEventListener('timeupdate', updateProgress);
     if (progressBar) {
         progressBar.addEventListener('click', seek);
     }
     
-    // Volume control
     if (volumeSlider) {
         volumeSlider.addEventListener('input', function() {
             videoElement.volume = this.value / 100;
         });
     }
     
-    // Speed control
     if (speedBtn && speedOptions) {
         speedBtn.addEventListener('click', function() {
             speedOptions.style.display = speedOptions.style.display === 'block' ? 'none' : 'block';
@@ -1379,7 +1352,6 @@ function setupVideoPlayer() {
         });
     }
     
-    // Fullscreen button
     if (fullscreenBtn) {
         fullscreenBtn.addEventListener('click', function() {
             if (!document.fullscreenElement) {
@@ -1392,10 +1364,8 @@ function setupVideoPlayer() {
         });
     }
     
-    // Video click to play/pause
     videoElement.addEventListener('click', togglePlayPause);
     
-    // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
         
@@ -1434,38 +1404,32 @@ function setupVideoPlayer() {
         }
     });
     
-    // Close speed options when clicking elsewhere
     document.addEventListener('click', function(e) {
         if (speedOptions && !e.target.closest('#speed-btn') && !e.target.closest('#speed-options')) {
             speedOptions.style.display = 'none';
         }
     });
     
-    // Update volume slider when video volume changes
     videoElement.addEventListener('volumechange', function() {
         if (volumeSlider) volumeSlider.value = videoElement.volume * 100;
     });
     
-    // When video ends
     videoElement.addEventListener('ended', function() {
         isPlaying = false;
         updatePlayButton();
     });
     
-    // When video starts playing
     videoElement.addEventListener('play', function() {
         isPlaying = true;
         updatePlayButton();
     });
     
-    // When video is paused
     videoElement.addEventListener('pause', function() {
         isPlaying = false;
         updatePlayButton();
     });
 }
 
-// Toggle play/pause
 function togglePlayPause() {
     const videoElement = document.getElementById('video-element');
     if (!videoElement) return;
@@ -1473,7 +1437,6 @@ function togglePlayPause() {
     if (videoElement.paused || videoElement.ended) {
         videoElement.play().catch(error => {
             console.log("Video play failed:", error);
-            // Show a message to the user
             showNotification('Click the video to start playback', 'error');
         });
     } else {
@@ -1483,7 +1446,6 @@ function togglePlayPause() {
     updatePlayButton();
 }
 
-// Update play button
 function updatePlayButton() {
     const videoElement = document.getElementById('video-element');
     const playPauseBtn = document.getElementById('play-pause-btn');
@@ -1499,7 +1461,6 @@ function updatePlayButton() {
     }
 }
 
-// Update progress bar
 function updateProgress() {
     const videoElement = document.getElementById('video-element');
     const progress = document.getElementById('progress');
@@ -1517,7 +1478,6 @@ function updateProgress() {
     }
 }
 
-// Seek in video
 function seek(e) {
     const videoElement = document.getElementById('video-element');
     const progressBar = document.getElementById('progress-bar');
@@ -1529,20 +1489,18 @@ function seek(e) {
     videoElement.currentTime = percent * videoElement.duration;
 }
 
-// Format time (seconds to MM:SS)
 function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-// Render authentication page
+// ==================== AUTH PAGE ====================
 function renderAuthPage() {
     const authContainer = document.getElementById('auth-container');
     if (!authContainer) return;
     
     if (currentUser) {
-        // User is logged in - show dashboard
         authContainer.innerHTML = `
             <div class="auth-header">
                 <h2>Welcome, ${currentUser.displayName || currentUser.email.split('@')[0]}</h2>
@@ -1569,7 +1527,6 @@ function renderAuthPage() {
         
         document.getElementById('dashboard-logout').addEventListener('click', logout);
     } else {
-        // User is not logged in - show auth forms
         authContainer.innerHTML = `
             <div class="auth-tabs">
                 <button class="auth-tab active" id="login-tab">Login</button>
@@ -1619,7 +1576,6 @@ function renderAuthPage() {
             </div>
         `;
         
-        // Add event listeners for auth tabs
         const loginTab = document.getElementById('login-tab');
         const signupTab = document.getElementById('signup-tab');
         const loginForm = document.getElementById('login-form');
@@ -1640,7 +1596,6 @@ function renderAuthPage() {
                 signupForm.classList.add('active');
             });
             
-            // Handle login form submission
             const loginFormContent = document.getElementById('login-form-content');
             if (loginFormContent) {
                 loginFormContent.addEventListener('submit', async (e) => {
@@ -1650,12 +1605,11 @@ function renderAuthPage() {
                     
                     const result = await login(email, password);
                     if (result.success) {
-                        // Update UI will happen via auth state change listener
+                        // UI will update via auth state change
                     }
                 });
             }
             
-            // Handle signup form submission
             const signupFormContent = document.getElementById('signup-form-content');
             if (signupFormContent) {
                 signupFormContent.addEventListener('submit', async (e) => {
@@ -1665,7 +1619,6 @@ function renderAuthPage() {
                     const password = document.getElementById('signup-password').value;
                     const confirmPassword = document.getElementById('signup-confirm-password').value;
                     
-                    // Validate passwords match
                     if (password !== confirmPassword) {
                         const signupMessage = document.getElementById('signup-message');
                         if (signupMessage) {
@@ -1677,7 +1630,7 @@ function renderAuthPage() {
                     
                     const result = await signUp(email, password, name);
                     if (result.success) {
-                        // Update UI will happen via auth state change listener
+                        // UI will update via auth state change
                     }
                 });
             }
@@ -1685,74 +1638,51 @@ function renderAuthPage() {
     }
 }
 
-// Initialize when DOM is loaded
+// ==================== NAVIGATION & SETTINGS ====================
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Firebase and EmailJS
     initializeFirebase();
     initializeEmailJS();
-    
-    // Set up navigation
+    loadReviewsFromStorage();
     setupNavigation();
-    
-    // Set up event listeners
     setupEventListeners();
-    
-    // Load initial products
     loadProducts();
-    
-    // Load saved settings
     loadSettings();
-    
-    // Initialize countdown timer
     initializeCountdownTimer();
     
-    // Hide loading spinner
     setTimeout(() => {
         showLoading(false);
     }, 500);
 });
 
-// Setup navigation
 let isMenuOpen = false;
 
 function setupNavigation() {
     const navLinks = document.querySelectorAll('.nav-link, .mobile-nav-item');
     const pages = document.querySelectorAll('.page');
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const navLinksContainer = document.getElementById('nav-links');
     
-    // Navigation click handler
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Update active states
             navLinks.forEach(l => l.classList.remove('active'));
             pages.forEach(page => page.classList.remove('active'));
             
             this.classList.add('active');
             
-            // Get page ID
             let pageId = this.getAttribute('data-page');
             
-            // Show corresponding page
             const pageElement = document.getElementById(pageId);
             if (pageElement) {
                 pageElement.classList.add('active');
-                
-                // Load page-specific content
                 loadPageContent(pageId);
-                
-                // Scroll to top
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
             
-            // Close mobile menu if open
             closeMobileMenu();
         });
     });
     
-    // Mobile menu toggle
     if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -1760,14 +1690,12 @@ function setupNavigation() {
         });
     }
     
-    // Close mobile menu when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.nav-links') && !e.target.closest('.mobile-menu-btn') && isMenuOpen) {
             closeMobileMenu();
         }
     });
     
-    // Close mobile menu when pressing Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && isMenuOpen) {
             closeMobileMenu();
@@ -1776,9 +1704,6 @@ function setupNavigation() {
 }
 
 function toggleMobileMenu() {
-    const navLinksContainer = document.getElementById('nav-links');
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    
     if (isMenuOpen) {
         closeMobileMenu();
     } else {
@@ -1796,8 +1721,6 @@ function openMobileMenu() {
         mobileMenuBtn.setAttribute('aria-label', 'Close menu');
     }
     isMenuOpen = true;
-    
-    // Prevent body scrolling when menu is open
     document.body.style.overflow = 'hidden';
 }
 
@@ -1811,14 +1734,10 @@ function closeMobileMenu() {
         mobileMenuBtn.setAttribute('aria-label', 'Open menu');
     }
     isMenuOpen = false;
-    
-    // Re-enable body scrolling
     document.body.style.overflow = 'auto';
 }
 
-// Setup event listeners
 function setupEventListeners() {
-    // Settings modal
     const settingsIcon = document.getElementById('settings-icon');
     const settingsModal = document.getElementById('settings-modal');
     const closeSettings = document.getElementById('close-settings');
@@ -1826,7 +1745,6 @@ function setupEventListeners() {
     if (settingsIcon) settingsIcon.addEventListener('click', openSettings);
     if (closeSettings) closeSettings.addEventListener('click', closeSettingsModal);
     
-    // Close modal when clicking outside
     if (settingsModal) {
         settingsModal.addEventListener('click', function(e) {
             if (e.target === this) {
@@ -1835,12 +1753,10 @@ function setupEventListeners() {
         });
     }
     
-    // Settings tabs
     document.querySelectorAll('.settings-tab').forEach(tab => {
         tab.addEventListener('click', function() {
             const tabId = this.getAttribute('data-tab') + '-tab';
             
-            // Update active tab
             document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
@@ -1850,7 +1766,6 @@ function setupEventListeners() {
         });
     });
     
-    // Theme selection
     document.querySelectorAll('.theme-option').forEach(option => {
         option.addEventListener('click', function() {
             const theme = this.getAttribute('data-theme');
@@ -1859,7 +1774,6 @@ function setupEventListeners() {
         });
     });
     
-    // Language selection
     document.querySelectorAll('.language-option').forEach(option => {
         option.addEventListener('click', function() {
             const lang = this.getAttribute('data-lang');
@@ -1867,10 +1781,8 @@ function setupEventListeners() {
         });
     });
     
-    // Sliders
     setupSliders();
     
-    // Font selection
     document.querySelectorAll('.font-option').forEach(option => {
         option.addEventListener('click', function() {
             const font = this.getAttribute('data-font');
@@ -1879,7 +1791,6 @@ function setupEventListeners() {
         });
     });
     
-    // Reset settings
     const resetBtn = document.getElementById('reset-settings');
     if (resetBtn) {
         resetBtn.addEventListener('click', function() {
@@ -1889,26 +1800,20 @@ function setupEventListeners() {
         });
     }
     
-    // Share website
     const shareBtn = document.getElementById('share-website');
     if (shareBtn) {
         shareBtn.addEventListener('click', shareWebsite);
     }
     
-    // Contact form
     const contactForm = document.getElementById('contact-form');
     if (contactForm) {
         contactForm.addEventListener('submit', handleContactForm);
     }
     
-    // Filter buttons are now set up in setupFilterEventListeners()
-    
-    // Button event listeners
     const seeVideoHomeBtn = document.getElementById('see-video-home');
     const buyProductHomeBtn = document.getElementById('buy-product-home');
     const seeVideoOfferBtn = document.getElementById('see-video-offer');
     const buyProductOfferBtn = document.getElementById('buy-product-offer');
-    const seeVideoDetailBtn = document.getElementById('see-video-detail');
     const buyNowDetailBtn = document.getElementById('buy-now-detail');
     const shareDetailBtn = document.getElementById('share-detail');
     const buyProductVideoBtn = document.getElementById('buy-product-video');
@@ -1942,30 +1847,25 @@ function setupEventListeners() {
     
     if (buyProductVideoBtn) buyProductVideoBtn.addEventListener('click', () => navigateToPage('products'));
     
-    // Logout button
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', logout);
     }
 }
 
-// Apply theme
 function applyTheme(theme) {
     document.body.className = '';
     if (theme !== 'default') {
         document.body.classList.add(`theme-${theme}`);
     }
     
-    // Update active theme option
     document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
     const activeOption = document.querySelector(`.theme-option[data-theme="${theme}"]`);
     if (activeOption) activeOption.classList.add('active');
     
-    // Save theme preference
     localStorage.setItem('theme', theme);
 }
 
-// Apply font
 function applyFont(font) {
     let fontFamily;
     switch(font) {
@@ -1987,16 +1887,13 @@ function applyFont(font) {
     
     document.documentElement.style.setProperty('--font-family', fontFamily);
     
-    // Update active font option
     document.querySelectorAll('.font-option').forEach(opt => opt.classList.remove('active'));
     const activeOption = document.querySelector(`.font-option[data-font="${font}"]`);
     if (activeOption) activeOption.classList.add('active');
     
-    // Save font preference
     localStorage.setItem('fontFamily', font);
 }
 
-// Share website
 function shareWebsite() {
     if (navigator.share) {
         navigator.share({
@@ -2013,16 +1910,13 @@ function shareWebsite() {
     }
 }
 
-// Share product
 function shareProduct(productName, productImage, productDescription) {
     const message = `Check out ${productName} from HT Service:\n\n${productDescription}\n\n${window.location.href}`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
 }
 
-// Setup sliders
 function setupSliders() {
-    // Font size slider
     const fontSizeSlider = document.getElementById('font-size-slider');
     const fontSizeValue = document.getElementById('font-size-value');
     
@@ -2035,7 +1929,6 @@ function setupSliders() {
         });
     }
     
-    // Border radius slider
     const borderRadiusSlider = document.getElementById('border-radius-slider');
     const borderRadiusValue = document.getElementById('border-radius-value');
     
@@ -2048,7 +1941,6 @@ function setupSliders() {
         });
     }
     
-    // Brightness slider
     const brightnessSlider = document.getElementById('brightness-slider');
     const brightnessValue = document.getElementById('brightness-value');
     
@@ -2061,7 +1953,6 @@ function setupSliders() {
         });
     }
     
-    // Contrast slider
     const contrastSlider = document.getElementById('contrast-slider');
     const contrastValue = document.getElementById('contrast-value');
     
@@ -2074,7 +1965,6 @@ function setupSliders() {
         });
     }
     
-    // Saturation slider
     const saturationSlider = document.getElementById('saturation-slider');
     const saturationValue = document.getElementById('saturation-value');
     
@@ -2087,7 +1977,6 @@ function setupSliders() {
         });
     }
     
-    // Animation speed slider
     const animationSpeedSlider = document.getElementById('animation-speed-slider');
     const animationSpeedValue = document.getElementById('animation-speed-value');
     
@@ -2101,17 +1990,13 @@ function setupSliders() {
     }
 }
 
-// Load settings from localStorage
 function loadSettings() {
-    // Load theme
     const savedTheme = localStorage.getItem('theme') || 'default';
     applyTheme(savedTheme);
     
-    // Load font
     const savedFont = localStorage.getItem('fontFamily') || 'sans-serif';
     applyFont(savedFont);
     
-    // Load font size
     const savedFontSize = localStorage.getItem('fontSize') || '16';
     const fontSizeSlider = document.getElementById('font-size-slider');
     const fontSizeValue = document.getElementById('font-size-value');
@@ -2121,7 +2006,6 @@ function loadSettings() {
         document.documentElement.style.setProperty('--font-size', savedFontSize + 'px');
     }
     
-    // Load border radius
     const savedBorderRadius = localStorage.getItem('borderRadius') || '12';
     const borderRadiusSlider = document.getElementById('border-radius-slider');
     const borderRadiusValue = document.getElementById('border-radius-value');
@@ -2131,7 +2015,6 @@ function loadSettings() {
         document.documentElement.style.setProperty('--border-radius', savedBorderRadius + 'px');
     }
     
-    // Load display settings
     const savedBrightness = localStorage.getItem('brightness') || '100';
     const brightnessSlider = document.getElementById('brightness-slider');
     const brightnessValue = document.getElementById('brightness-value');
@@ -2168,12 +2051,10 @@ function loadSettings() {
         document.documentElement.style.setProperty('--animation-speed', savedAnimationSpeed + 's');
     }
     
-    // Load language
     const savedLang = localStorage.getItem('language') || 'en';
     changeLanguage(savedLang);
 }
 
-// Open settings
 function openSettings() {
     const settingsModal = document.getElementById('settings-modal');
     if (settingsModal) {
@@ -2182,7 +2063,6 @@ function openSettings() {
     }
 }
 
-// Close settings modal
 function closeSettingsModal() {
     const settingsModal = document.getElementById('settings-modal');
     if (settingsModal) {
@@ -2191,23 +2071,16 @@ function closeSettingsModal() {
     }
 }
 
-// Save settings
 function saveSettings() {
-    // Theme is already saved when applied
-    // Font is already saved when applied
-    // Sliders are saved when changed
-    // Language is saved when changed
-    
     showNotification('Settings saved successfully!');
 }
 
-// Reset settings
 function resetSettings() {
     localStorage.clear();
     location.reload();
 }
 
-// Fix for iOS zoom on input focus
+// iOS zoom fix
 if (isMobile.iOS()) {
     document.addEventListener('focusin', function(event) {
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT') {
@@ -2226,7 +2099,6 @@ if (isMobile.iOS()) {
     });
 }
 
-// Handle orientation change
 window.addEventListener('orientationchange', function() {
     setTimeout(() => {
         window.scrollTo(0, 0);
