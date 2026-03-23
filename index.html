@@ -18,7 +18,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6a11cb">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     <link rel="icon" href="icons/icon-192.png">
@@ -27,7 +27,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
     
     <!-- Jameel Noori Font -->
-    <link href="https://urdulabs.com/fonts/jameel-noori-nastaleeq" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/jameel-noori-nastaleeq" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -587,6 +587,17 @@
             margin-bottom: 1rem;
         }
 
+        /* Product Rating on Cards */
+        .product-rating {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        .product-rating span:first-child {
+            font-weight: bold;
+            color: #ffc107;
+        }
+
         .product-actions {
             display: flex;
             gap: 0.5rem;
@@ -616,8 +627,8 @@
         }
 
         .product-detail-image img {
-            width: 100%;
-            height: auto;
+            width: 50%;
+            height: 50%;
             display: block;
         }
 
@@ -678,6 +689,64 @@
             color: var(--primary-color);
             font-weight: bold;
             font-size: 1.1rem;
+        }
+
+        /* Reviews Section */
+        .product-reviews {
+            margin-top: 2rem;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .reviews-list {
+            margin: 1rem 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .review-item {
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .reviewer-name {
+            font-weight: bold;
+        }
+        .review-rating {
+            color: #ffc107;
+            letter-spacing: 2px;
+        }
+        .review-date {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        .review-comment {
+            margin-top: 0.5rem;
+            line-height: 1.5;
+        }
+        .write-review {
+            margin-top: 2rem;
+        }
+        .star-rating {
+            display: inline-flex;
+            gap: 0.25rem;
+            cursor: pointer;
+        }
+        .star-rating span {
+            font-size: 1.8rem;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+        .star-rating span.active,
+        .star-rating span:hover {
+            color: #ffc107;
         }
 
         /* Mobile-Optimized Video Player */
@@ -1832,6 +1901,40 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Reviews Section -->
+            <div class="product-reviews">
+                <h3>Customer Reviews</h3>
+                <div id="reviews-list" class="reviews-list">
+                    <!-- Reviews will be loaded here -->
+                </div>
+
+                <div class="write-review">
+                    <h4>Write a Review</h4>
+                    <form id="review-form">
+                        <div class="form-group">
+                            <label for="review-name">Your Name</label>
+                            <input type="text" id="review-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Rating</label>
+                            <div class="star-rating" id="star-rating">
+                                <span data-value="1">★</span>
+                                <span data-value="2">★</span>
+                                <span data-value="3">★</span>
+                                <span data-value="4">★</span>
+                                <span data-value="5">★</span>
+                            </div>
+                            <input type="hidden" id="review-rating" value="5">
+                        </div>
+                        <div class="form-group">
+                            <label for="review-comment">Your Review</label>
+                            <textarea id="review-comment" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </form>
+                </div>
+            </div>
         </section>
 
         <!-- Special Offer Page -->
@@ -1910,9 +2013,6 @@
                     <video id="video-element" controls>
                         <source src="" type="video/mp4">
                     </video>
-                        <h3 id="video-title"></h3>
-                        <p id="video-description"></p>
-
                     <div class="video-controls">
                         <button class="play-pause-btn" id="play-pause-btn" aria-label="Play/Pause">
                             <i class="fas fa-play"></i>
@@ -1969,30 +2069,30 @@
                 <form id="contact-form">
                     <div class="form-group">
                         <label for="name" data-translate="full_name">Full Name *</label>
-                        <input type="text" id="name" class="form-control" name="from_name" required aria-required="true">
+                        <input type="text" id="name" class="form-control" required aria-required="true">
                         <div class="error-message" id="name-error"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="email" data-translate="email">Email Address *</label>
-                        <input type="email" id="email" class="form-control" name="from_email" required aria-required="true" inputmode="email">
+                        <input type="email" id="email" class="form-control" required aria-required="true" inputmode="email">
                         <div class="error-message" id="email-error"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="phone" data-translate="phone">Phone Number</label>
-                        <input type="tel" id="phone" class="form-control" name="phone" inputmode="tel">
+                        <input type="tel" id="phone" class="form-control" inputmode="tel">
                     </div>
                     
                     <div class="form-group">
                         <label for="subject" data-translate="subject">Subject *</label>
-                        <input type="text" id="subject" class="form-control" name="subject" required aria-required="true">
+                        <input type="text" id="subject" class="form-control" required aria-required="true">
                         <div class="error-message" id="subject-error"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="message" data-translate="message">Message *</label>
-                        <textarea id="message" class="form-control" name="message" rows="5" required aria-required="true"></textarea>
+                        <textarea id="message" class="form-control" rows="5" required aria-required="true"></textarea>
                         <div class="error-message" id="message-error"></div>
                     </div>
                     
@@ -2018,7 +2118,7 @@
         </section>
     </main>
 
-<!-- In index.html, update mobile bottom navigation section -->
+    <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
         <div class="mobile-nav-items">
             <a href="#" class="mobile-nav-item active" data-page="home" aria-label="Home">
@@ -2041,8 +2141,7 @@
                 <i class="fas fa-envelope"></i>
                 <span data-translate="contact">Contact</span>
             </a>
-            </div>
-        </nav>
+        </div>
     </nav>
 
     <footer>
@@ -2204,8 +2303,39 @@
     <div class="notification" id="notification">
         <span id="notification-text">Settings saved successfully!</span>
     </div>
+
+    <!-- Firebase and App Configuration -->
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+            appId: "YOUR_FIREBASE_APP_ID"
+        };
+
+        // EmailJS Configuration
+        const emailjsConfig = {
+            serviceID: "YOUR_EMAILJS_SERVICE_ID",
+            templateID: "YOUR_EMAILJS_TEMPLATE_ID",
+            userID: "YOUR_EMAILJS_USER_ID"
+        };
+
+        // Offer Configuration
+        const offerConfig = {
+            active: true,
+            percentage: 50,
+            startDate: "2026-01-01T00:00:00", // Offer start date
+            endDate: "2026-01-31T23:59:59",    // Offer end date
+            title: "Year End Special",
+            description: "Huge discounts on all products!"
+        };
+    </script>
+
     <!-- Main Application Script -->
-     <script src="firebase-setup.js"></script>
+    <script src="firebase-setup.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
