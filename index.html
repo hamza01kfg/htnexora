@@ -3,20 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>The Tech Bit - Innovative Products</title>
+    <title>The Tech Bit - Innovative Tech Products | Shop Smart Gadgets</title>
+    <meta name="description" content="The Tech Bit offers premium innovative tech products including wireless earbuds, smartwatches, gaming gear, and audio accessories. Fast delivery and secure payment.">
+    <meta name="keywords" content="tech products, gadgets, smartwatch, wireless earbuds, gaming keyboard, Bluetooth speaker, The Tech Bit, online tech store">
+    <meta name="author" content="The Tech Bit">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://hamza01kfg.github.io/htnexora/">
+    <!-- Open Graph -->
+    <meta property="og:title" content="The Tech Bit - Innovative Tech Products">
+    <meta property="og:description" content="Discover premium tech gadgets that transform your daily life. Smartwatches, earbuds, speakers, and more.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://hamza01kfg.github.io/htnexora/">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="The Tech Bit">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Tech Bit - Innovative Tech Products">
+    <meta name="twitter:description" content="Premium tech gadgets for modern lifestyle.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%236a11cb'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-weight='bold'%3ETTB%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/png" size="192x192" href="images/logo.png">
+    <link rel="icon" type="image/png" size="512x512" href="images/logo-512.png">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
 
-<div class="loading-spinner" id="loading"><div class="spinner"></div></div>
+<div class="loading-spinner" id="loading">
+    <div class="spinner"></div>
+    <p style="margin-top:16px; color:var(--text);">Loading...</p>
+</div>
 
 <header>
     <nav>
-        <div class="logo"><i class="fas fa-microchip"></i> <span>The Tech Bit</span></div>
+        <div class="logo">
+            <image src="image/logo.png" alt="The Tech Bit" style="height:30px; vertical-align: middile;">
+        </div>
         <button class="mobile-menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
         <ul class="nav-links" id="navLinks">
             <li><a href="#" class="nav-link active" data-page="home">Home</a></li>
@@ -27,8 +51,8 @@
             <li><a href="#" class="nav-link" data-page="auth">Account</a></li>
         </ul>
         <div class="header-controls">
-            <button class="share-icon" id="shareSite"><i class="fas fa-share-alt"></i></button>
-            <button class="settings-icon" id="settingsBtn"><i class="fas fa-cog"></i></button>
+            <button class="share-icon" id="shareSite" aria-label="Share"><i class="fas fa-share-alt"></i></button>
+            <button class="settings-icon" id="settingsBtn" aria-label="Settings"><i class="fas fa-cog"></i></button>
         </div>
     </nav>
 </header>
@@ -36,7 +60,7 @@
 <main>
     <!-- Home Page -->
     <section id="home" class="page active">
-        <div class="hero">
+        <div class="hero fade-in-up">
             <h1>Welcome to The Tech Bit</h1>
             <p>Discover innovative products that will transform your daily life.</p>
             <div class="btn-group">
@@ -44,35 +68,37 @@
                 <button class="btn btn-secondary" id="homeProductsBtn"><i class="fas fa-shopping-cart"></i> Buy Product</button>
             </div>
         </div>
+        <h2 style="margin: 20px 0 10px; color: var(--primary);">Featured Products</h2>
         <div class="products-grid" id="homeProducts"></div>
     </section>
 
     <!-- Products Page -->
     <section id="products" class="page">
-        <div class="hero">
+        <div class="hero fade-in-up">
             <h1>Our Products</h1>
             <p>Explore our complete range of innovative tech products.</p>
         </div>
         <div class="filter-container">
             <div class="filter-group">
-                <input type="text" id="searchInput" class="filter-input" placeholder="Search products...">
+                <input type="text" id="searchInput" class="filter-input" placeholder="Search products..." aria-label="Search">
                 <select id="brandFilter" class="filter-select"><option value="">All Brands</option></select>
                 <select id="categoryFilter" class="filter-select"><option value="">All Categories</option></select>
                 <button class="filter-btn" id="applyFilters">Apply Filters</button>
                 <button class="filter-btn" id="resetFilters" style="background:#6c757d">Reset</button>
             </div>
         </div>
+        <div id="productError" class="empty-message" style="display:none;"></div>
         <div class="products-grid" id="productsGrid"></div>
-        <div id="pagination" style="text-align:center; margin-top:20px;">
+        <div id="pagination" style="text-align:center; margin-top:20px; display:none;">
             <button id="prevPage" class="btn btn-secondary">Prev</button>
-            <span id="pageInfo" style="margin:0 16px;">Page 1</span>
+            <span id="pageNumbers" style="margin:0 8px; display:inline-flex; gap:4px; flex-wrap:wrap; justify-content:center;"></span>
             <button id="nextPage" class="btn btn-secondary">Next</button>
         </div>
     </section>
 
     <!-- Offer Page -->
     <section id="offer" class="page">
-        <div class="hero">
+        <div class="hero fade-in-up">
             <h1>Special Limited Time Offer</h1>
             <p>Don't miss our exclusive promotion with incredible savings.</p>
         </div>
@@ -94,7 +120,7 @@
 
     <!-- Video Page -->
     <section id="video" class="page">
-        <div class="hero">
+        <div class="hero fade-in-up">
             <h1>Product Videos</h1>
             <p>Watch our product demonstrations and see how The Tech Bit can transform your daily routine.</p>
         </div>
@@ -103,11 +129,11 @@
                 <video id="mainVideo" poster="https://via.placeholder.com/640x360?text=Tech+Video"></video>
             </div>
             <div class="video-controls">
-                <button id="playPauseBtn" class="btn" style="background:none; color:white;"><i class="fas fa-play"></i></button>
+                <button id="playPauseBtn" class="btn video-btn" aria-label="Play/Pause"><i class="fas fa-play"></i></button>
                 <div class="progress-bar" id="progressBar"><div class="progress" id="progress"></div></div>
                 <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
-                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="100">
-                <button id="fullscreenBtn" class="btn" style="background:none; color:white;"><i class="fas fa-expand"></i></button>
+                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="100" aria-label="Volume">
+                <button id="fullscreenBtn" class="btn video-btn" aria-label="Fullscreen"><i class="fas fa-expand"></i></button>
             </div>
             <div class="video-info" style="padding: 16px;">
                 <h3 id="videoTitle"></h3>
@@ -120,7 +146,7 @@
 
     <!-- Contact Page -->
     <section id="contact" class="page">
-        <div class="hero">
+        <div class="hero fade-in-up">
             <h1>Contact Us</h1>
             <p>Have questions or need support? Get in touch with our team.</p>
         </div>
@@ -131,14 +157,14 @@
                 <div class="form-group"><label>Phone</label><input type="tel" id="contactPhone" class="form-control"></div>
                 <div class="form-group"><label>Subject *</label><input type="text" id="contactSubject" class="form-control" required></div>
                 <div class="form-group"><label>Message *</label><textarea id="contactMessage" class="form-control" rows="5" required></textarea></div>
-                <button type="submit" class="btn btn-primary">Send Message</button>
+                <button type="submit" class="btn btn-primary" id="contactSubmitBtn">Send Message</button>
             </form>
         </div>
     </section>
 
     <!-- Account Page -->
     <section id="auth" class="page">
-        <div class="hero">
+        <div class="hero fade-in-up">
             <h1>Account</h1>
             <p>Sign in or create an account to access exclusive features.</p>
         </div>
@@ -200,8 +226,17 @@
 </div>
 
 <footer>
-    <p>&copy; 2026 The Tech Bit. All rights reserved.</p>
-    <p>Contact: info@thetechbit.com | +92 308 2528844</p>
+    <div class="footer-content">
+        <div class="footer-links">
+            <a href="#" data-page="home">Home</a>
+            <a href="#" data-page="products">Products</a>
+            <a href="#" data-page="video">Videos</a>
+            <a href="#" data-page="contact">Contact</a>
+            <a href="#" data-page="auth">Account</a>
+        </div>
+        <p>&copy; 2026 <strong>The Tech Bit</strong>. All rights reserved.</p>
+        <p>Contact: info@thetechbit.com | +92 308 2528844</p>
+    </div>
 </footer>
 
 <div class="notification" id="notification"><span id="notifyText"></span></div>
